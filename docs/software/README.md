@@ -261,130 +261,152 @@ COMMIT;
 
 ## Entity
 
-### Role
+### Project
 
-```java
+```Java
 package db.lab6.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
-
-@Data
-@Table(name = "role")
 @Entity
-public class Role {
+@Table(name = "project")
+@Data
+public class Project {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(nullable = false)
+    private String description;
 }
 ```
+### User
 
-### Permission
-
-```java
+```Java
 package db.lab6.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "permission")
+@Table(name = "users")
 @Data
-public class Permission {
+public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable = false)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, unique = true)
+    private String nickname;
+
+    @Column(nullable = false)
+    private String password;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+}
+```
+
+### Task
+
+```Java
+package db.lab6.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Table(name = "task")
+@Data
+public class Task {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
 
     @Column(nullable = false, unique = true)
     private String name;
-}
-```
 
-### Grant
-
-```java
-package db.lab6.entity;
-
-import jakarta.persistence.*;
-import lombok.Data;
-
-@Entity
-@Table(name = "grants")
-@Data
-public class Grant {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    private Long id;
+    private String description;
+
+    @Column(nullable = true)
+    private String isCompleted;
 
     @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
-
-    @ManyToOne
-    @JoinColumn(name = "permission_id", nullable = false)
-    private Permission permission;
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 }
 ```
 
 ## DTO
 
-### RoleDTO
+### ProjectDTO
 
-```java
+```Java
 package db.lab6.dto;
 
 import lombok.Data;
 
 @Data
-public class RoleDTO {
+public class ProjectDTO {
     private String name;
+    private String description;
 }
 ```
 
-### PermissionDTO
+### UserDTO
 
-```java
+```Java
 package db.lab6.dto;
 
 import lombok.Data;
 
 @Data
-public class PermissionDTO {
-    private String name;
+public class UserDTO {
+    private String email;
+    private String nickname;
+    private String password;
+    private Long projectId;
 }
 ```
 
-### GrantDTO
+### TaskDTO
 
-```java
+```Java
 package db.lab6.dto;
 
 import lombok.Data;
 
 @Data
-public class GrantDTO {
-    private Long roleId;
-    private Long permissionId;
+public class TaskDTO {
+    private String name;
+    private String description;
+    private String isCompleted;
+    private Long projectId;
 }
 ```
 
 ## Controller
 
-### RoleController
+### ProjectController
 
-```java
+```Java
 package db.lab6.controller;
 
-import db.lab6.dto.RoleDTO;
-import db.lab6.entity.Role;
-import db.lab6.service.RoleService;
+import db.lab6.dto.ProjectDTO;
+import db.lab6.entity.Project;
+import db.lab6.service.ProjectService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -392,49 +414,45 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/role")
-public class RoleController {
-    private RoleService roleService;
+@RequestMapping("/project")
+public class ProjectController {
+    private ProjectService projectService;
 
     @PostMapping("/add")
-    public Role addRole(@RequestBody RoleDTO roleDTO) {
-        Role role = roleService.addRole(roleDTO);
-        return role;
+    public Project addProject(@RequestBody ProjectDTO projectDTO){
+        Project project = projectService.addProject(projectDTO);
+        return project;
     }
-
     @GetMapping("/get/{id}")
-    public Role getRoleById(@PathVariable Long id) {
-        Role role = roleService.getRoleById(id);
-        return role;
+    public Project getProjectById(@PathVariable Long id){
+        Project project = projectService.getProjectById(id);
+        return project;
     }
-
     @GetMapping("/get/all")
-    public List<Role> getAllRoles() {
-        return roleService.getAllRoles();
+    public List<Project> getAllProjects(){
+        return projectService.getAllProjects();
     }
-
     @PutMapping("/update/{id}")
-    public Role updateRole(@PathVariable Long id, @RequestBody RoleDTO roleDTO) {
-        Role role = roleService.updateRole(id, roleDTO);
-        return role;
+    public Project updateProject(@PathVariable Long id, @RequestBody ProjectDTO projectDTO){
+        Project project = projectService.updateProject(id, projectDTO);
+        return project;
     }
-
     @DeleteMapping("/delete/{id}")
-    public String deleteRole(@PathVariable Long id) {
-        roleService.deleteRole(id);
-        return "Role deleted";
+    public String deleteProject(@PathVariable Long id){
+        projectService.deleteProject(id);
+        return "Project deleted";
     }
 }
 ```
 
-### PermissionController
+### UserController
 
-```java
+```Java
 package db.lab6.controller;
 
-import db.lab6.dto.PermissionDTO;
-import db.lab6.entity.Permission;
-import db.lab6.service.PermissionService;
+import db.lab6.dto.UserDTO;
+import db.lab6.entity.User;
+import db.lab6.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -442,50 +460,45 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/permission")
-public class PermissionController {
-    private PermissionService permissionService;
+@RequestMapping("/user")
+public class UserController {
+    private UserService userService;
 
     @PostMapping("/add")
-    public Permission addRole(@RequestBody PermissionDTO permissionDTO) {
-        Permission permission = permissionService.addPermission(permissionDTO);
-        return permission;
+    public User addUser(@RequestBody UserDTO userDTO){
+        User user = userService.addUser(userDTO);
+        return user;
     }
-
     @GetMapping("/get/{id}")
-    public Permission getRoleById(@PathVariable Long id) {
-        Permission permission = permissionService.getPermissionById(id);
-        return permission;
+    public User getUserById(@PathVariable Long id){
+        User user = userService.getUserById(id);
+        return user;
     }
-
     @GetMapping("/get/all")
-    public List<Permission> getAllPermissions() {
-        return permissionService.getAllPermissions();
+    public List<User> getAllUsers(){
+        return userService.getAllUsers();
     }
-
     @PutMapping("/update/{id}")
-    public Permission updateRole(@PathVariable Long id, @RequestBody PermissionDTO permissionDTO) {
-        Permission permission = permissionService.updatePermission(id, permissionDTO);
-        return permission;
+    public User updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO){
+        User user = userService.updateUser(id, userDTO);
+        return user;
     }
-
     @DeleteMapping("/delete/{id}")
-    public String deleteRole(@PathVariable Long id) {
-        permissionService.deletePermission(id);
-        return "Permission deleted";
+    public String deleteUser(@PathVariable Long id){
+        userService.deleteUser(id);
+        return "User deleted";
     }
-
 }
 ```
 
-### GrantController
+### TaskController
 
-```java
+```Java
 package db.lab6.controller;
 
-import db.lab6.dto.GrantDTO;
-import db.lab6.entity.Grant;
-import db.lab6.service.GrantService;
+import db.lab6.dto.TaskDTO;
+import db.lab6.entity.Task;
+import db.lab6.service.TaskService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -493,62 +506,51 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/grant")
-public class GrantController {
-    private GrantService grantService;
+@RequestMapping("/task")
+public class TaskController {
+    private TaskService taskService;
 
     @PostMapping("/add")
-    public Grant addGrant(@RequestBody GrantDTO grantDTO) {
-        Grant grant = grantService.addGrant(grantDTO);
-        return grant;
+    public Task addTask(@RequestBody TaskDTO taskDTO) {
+        Task task = taskService.addTask(taskDTO);
+        return task;
     }
 
     @GetMapping("/get/{id}")
-    public Grant getRoleById(@PathVariable Long id) {
-        Grant grant = grantService.getGrantById(id);
-        return grant;
+    public Task getTaskById(@PathVariable Long id) {
+        Task task = taskService.getTaskById(id);
+        return task;
     }
 
     @GetMapping("/get/all")
-    public List<Grant> getAllGrants() {
-        return grantService.getAllGrants();
-    }
-
-    @GetMapping("/get/by_role/{id}")
-    public List<Grant> getGrantsByRoleId(@PathVariable Long id) {
-        return grantService.getGrantsByRoleId(id);
-    }
-
-    @GetMapping("/get/by_permission/{id}")
-    public List<Grant> getGrantByPermissionId(@PathVariable Long id) {
-        return grantService.getGrantsByPermissionId(id);
+    public List<Task> getAllTasks() {
+        return taskService.getAllTasks();
     }
 
     @PutMapping("/update/{id}")
-    public Grant updateGrant(@PathVariable Long id, @RequestBody GrantDTO grantDTO) {
-        Grant grant = grantService.updateGrant(id, grantDTO);
-        return grant;
+    public Task updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDTO) {
+        Task task = taskService.updateTask(id, taskDTO);
+        return task;
     }
 
     @DeleteMapping("/delete/{id}")
-    public String deleteGrant(@PathVariable Long id) {
-        grantService.deleteGrant(id);
-        return "Grant deleted";
+    public String deleteTask(@PathVariable Long id) {
+        taskService.deleteTask(id);
+        return "Task deleted";
     }
-
 }
 ```
 
 ## Service
 
-### RoleService
+### ProjectService
 
-```java
+```Java
 package db.lab6.service;
 
-import db.lab6.dto.RoleDTO;
-import db.lab6.entity.Role;
-import db.lab6.repository.RoleRepository;
+import db.lab6.dto.ProjectDTO;
+import db.lab6.entity.Project;
+import db.lab6.repository.ProjectRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -556,97 +558,104 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class RoleService {
-    private RoleRepository roleRepository;
+public class ProjectService {
+    private ProjectRepository projectRepository;
 
-    public Role addRole(RoleDTO roleDTO) {
-        Role role = new Role();
-        role.setName(roleDTO.getName());
-        return roleRepository.save(role);
+    public Project addProject(ProjectDTO projectDTO) {
+        Project project = new Project();
+        project.setName(projectDTO.getName());
+        project.setDescription(projectDTO.getDescription());
+        return projectRepository.save(project);
     }
 
-    public Role getRoleById(Long id) {
-        return roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Role not found"));
+    public Project getProjectById(Long id) {
+        return projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project not found"));
     }
 
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public List<Project> getAllProjects() {
+        return projectRepository.findAll();
     }
 
-    public Role updateRole(Long id, RoleDTO roleDTO) {
-        Role role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Role not found"));
-        role.setName(roleDTO.getName());
-        return roleRepository.save(role);
+    public Project updateProject(Long id, ProjectDTO projectDTO) {
+        Project project = projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project not found"));
+        project.setName(projectDTO.getName());
+        project.setDescription(projectDTO.getDescription());
+        return projectRepository.save(project);
     }
-
-    public void deleteRole(Long id) {
-        if (roleRepository.existsById(id)) {
-            roleRepository.deleteById(id);
+    public void deleteProject(Long id) {
+        if (projectRepository.existsById(id)) {
+            projectRepository.deleteById(id);
         } else {
-            throw new IllegalArgumentException("Role not found");
+            throw new IllegalArgumentException("Project not found");
         }
     }
 }
 ```
 
-### PermissionService
+### UserService
 
-```java
+```Java
 package db.lab6.service;
 
-import db.lab6.dto.PermissionDTO;
-import db.lab6.entity.Permission;
-import db.lab6.repository.PermissionRepository;
+import db.lab6.dto.UserDTO;
+import db.lab6.entity.User;
+import db.lab6.repository.ProjectRepository;
+import db.lab6.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
 @Service
 @AllArgsConstructor
-public class PermissionService {
-    private PermissionRepository permissionRepository;
+public class UserService {
+    private UserRepository userRepository;
+    private ProjectRepository projectRepository;
 
-    public Permission addPermission(PermissionDTO permissionDTO) {
-        Permission permission = new Permission();
-        permission.setName(permissionDTO.getName());
-        return permissionRepository.save(permission);
+    public User addUser(UserDTO userDTO) {
+        User user = new User();
+        user.setEmail(userDTO.getEmail());
+        user.setNickname(userDTO.getNickname());
+        user.setPassword(userDTO.getPassword());
+        user.setProject(projectRepository.findById(userDTO.getProjectId()).orElseThrow(() -> new IllegalArgumentException("Project not found")));
+        return userRepository.save(user);
+    }
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
-    public Permission getPermissionById(Long id) {
-        return permissionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Permission not found"));
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
     }
 
-    public List<Permission> getAllPermissions() {
-        return permissionRepository.findAll();
+    public User updateUser(Long id, UserDTO userDTO) {
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setEmail(userDTO.getEmail());
+        user.setNickname(userDTO.getNickname());
+        user.setPassword(userDTO.getPassword());
+        user.setProject(projectRepository.findById(userDTO.getProjectId()).orElseThrow(() -> new IllegalArgumentException("Project not found")));
+        return userRepository.save(user);
     }
 
-    public Permission updatePermission(Long id, PermissionDTO permissionDTO) {
-        Permission permission = permissionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Permission not found"));
-        permission.setName(permissionDTO.getName());
-        return permissionRepository.save(permission);
-    }
-
-    public void deletePermission(Long id) {
-        if (permissionRepository.existsById(id)) {
-            permissionRepository.deleteById(id);
+    public void deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
         } else {
-            throw new IllegalArgumentException("Permission not found");
+            throw new IllegalArgumentException("User not found");
         }
     }
 }
 ```
-### GrantService
 
-```java
+### TaskService
+
+```Java
 package db.lab6.service;
 
-import db.lab6.dto.GrantDTO;
-import db.lab6.entity.Grant;
-import db.lab6.repository.GrantRepository;
-import db.lab6.repository.PermissionRepository;
-import db.lab6.repository.RoleRepository;
+import db.lab6.dto.TaskDTO;
+import db.lab6.entity.Task;
+import db.lab6.repository.ProjectRepository;
+import db.lab6.repository.TaskRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -654,97 +663,89 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class GrantService {
-    private GrantRepository grantRepository;
-    private RoleRepository roleRepository;
-    private PermissionRepository permissionRepository;
+public class TaskService {
+    private TaskRepository taskRepository;
+    private ProjectRepository projectRepository;
 
-    public Grant addGrant(GrantDTO grantDTO) {
-        Grant grant = new Grant();
-        grant.setRole(
-                roleRepository.findById(grantDTO.getRoleId()).orElseThrow(() -> new IllegalArgumentException("Role not found"))
-        );
-        grant.setPermission(
-                permissionRepository.findById(grantDTO.getPermissionId()).orElseThrow(() -> new IllegalArgumentException("Permission not found"))
-        );
-        return grantRepository.save(grant);
+    public Task addTask(TaskDTO taskDTO) {
+        Task task = new Task();
+        task.setName(taskDTO.getName());
+        task.setDescription(taskDTO.getDescription());
+        task.setIsCompleted(taskDTO.getIsCompleted());
+        task.setProject(projectRepository.findById(taskDTO.getProjectId()).orElseThrow(() -> new IllegalArgumentException("Project not found")));
+        return taskRepository.save(task);
+    }
+    public Task getTaskById(Long id) {
+        return taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
-    public Grant getGrantById(Long id) {
-        return grantRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Grant not found"));
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
     }
 
-    public List<Grant> getAllGrants() {
-        return grantRepository.findAll();
+    public Task updateTask(Long id, TaskDTO taskDTO) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Task not found"));
+        task.setName(taskDTO.getName());
+        task.setDescription(taskDTO.getDescription());
+        task.setIsCompleted(taskDTO.getIsCompleted());
+        task.setProject(projectRepository.findById(taskDTO.getProjectId()).orElseThrow(() -> new IllegalArgumentException("Project not found")));
+        return taskRepository.save(task);
     }
 
-    public void deleteGrant(Long id) {
-        grantRepository.deleteById(id);
-    }
-
-    public Grant updateGrant(Long id, GrantDTO grantDTO) {
-        Grant grant = getGrantById(id);
-        grant.setRole(
-                roleRepository.findById(grantDTO.getRoleId()).orElseThrow(() -> new IllegalArgumentException("Role not found"))
-        );
-        grant.setPermission(
-                permissionRepository.findById(grantDTO.getPermissionId()).orElseThrow(() -> new IllegalArgumentException("Permission not found"))
-        );
-        return grantRepository.save(grant);
-    };
-
-    public List<Grant> getGrantsByRoleId(Long roleId) {
-        return grantRepository.findByRoleId(roleId);
-    }
-
-    public List<Grant> getGrantsByPermissionId(Long permissionId) {
-        return grantRepository.findByPermissionId(permissionId);
+    public void deleteTask(Long id) {
+        if (taskRepository.existsById(id)){
+            taskRepository.deleteById(id);
+        } else {
+            throw new IllegalArgumentException("Task not found");
+        }
     }
 }
 ```
+
 ## Repository
 
-### RoleRepository
+### ProjectRepository
 
-```java
+```Java
 package db.lab6.repository;
 
-import db.lab6.entity.Role;
+import db.lab6.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RoleRepository extends JpaRepository<Role, Long> { }
+public interface ProjectRepository extends JpaRepository<Project, Long> {
+
+}
 ```
 
-### PermissionRepository
+### UserRepository
 
-```java
+```Java
 package db.lab6.repository;
 
-import db.lab6.entity.Permission;
+import db.lab6.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PermissionRepository extends JpaRepository<Permission, Long> { }
+public interface UserRepository extends JpaRepository<User, Long> {
+
+}
 ```
 
-### GrantRepository
+### TaskRepository
 
-```java
+```Java
 package db.lab6.repository;
 
-import db.lab6.entity.Grant;
+import db.lab6.entity.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+public interface TaskRepository extends JpaRepository<Task, Long> {
 
-public interface GrantRepository extends JpaRepository<Grant, Long> {
-    List<Grant> findByRoleId(Long roleId);
-    List<Grant> findByPermissionId(Long permissionId);
 }
 ```
 
 ## SpringMainClass
 
-```java
+```Java
 package db.lab6;
 
 import org.springframework.boot.SpringApplication;
@@ -752,9 +753,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Lab6Application {
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(Lab6Application.class, args);
 	}
+
 }
 ```

@@ -8,57 +8,51 @@
 
 
 ### POST
-![](./assets/role_post.png)
+![](./assets/ProjectAdd.jpg)
 
 ### GET (all)
-![](./assets/role_get_all.png)
+![](./assets/ProjectGetAll.jpg)
 
 ### GET (id)
-![](./assets/role_get_id.png)
+![](./assets/ProjectGetId.jpg)
 
 ### PUT
-![](./assets/role_put.png)
+![](./assets/ProjectPut.jpg)
 
 ### DELETE
-![](./assets/role_delete.png)
+![](./assets/ProjectDelete.jpg)
 
 
 ## Permission
 
 ### POST
-![](./assets/permission_post.png)
+![](./assets/TaskAdd.jpg)
 
 ### GET (all)
-![](./assets/permission_get_all.png)
+![](./assets/TaskGetAll.jpg)
 
 ### GET (id)
-![](./assets/permission_get_id.png)
+![](./assets/TaskGetId.jpg)
 
 ### PUT
-![](./assets/permission_put.png)
+![](./assets/TaskPut.jpg)
 
 ### DELETE
-![](./assets/permission_delete.png)
+![](./assets/TaskDelete.jpg)
 
 ## Grant
 
 ### POST
-![](./assets/grant_post.png)
+![](./assets/UserAdd.jpg)
 
 ### GET (all)
-![](./assets/grant_get_all.png)
+![](./assets/UserGetAll.jpg)
 
 ### GET (id)
-![](./assets/grant_get_id.png)
-
-### GET (roleID)
-![](./assets/grant_get_roleid.png)
-
-### GET (permissionId)
-![](./assets/grant_get_permissionid.png)
+![](./assets/UserGetId.jpg)
 
 ### PUT
-![](./assets/grant_put.png)
+![](./assets/UserPut.jpg)
 
 ### DELETE
-![](./assets/grant_delete.png)
+![](./assets/UserDelete.jpg)
